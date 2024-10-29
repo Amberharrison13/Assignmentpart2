@@ -1,70 +1,76 @@
-/*
- * Click nbfs://nbhost/SystemFileSystem/Templates/Licenses/license-default.txt to change this license
- */
-
 package com.mycompany.assignmentpart2;
+
 import javax.swing.JOptionPane;
 
-
-/**
- *
- * @author RC_Student_lab
- */
 public class Assignmentpart2 {
 
     public static void main(String[] args) {
-       System.out.println("Welcome to EasyKanban");
+        String username;
+        String password;
+        String firstname, lastname;
+        boolean isRegistered = false;
+        boolean isLoggedIn = false;
 
-        String username = JOptionPane.showInputDialog("Enter username");
-        String password = JOptionPane.showInputDialog("Enter password");
+        // Instances of required classes
+        LoginClass log = new LoginClass();
 
-        if (username.equals("admin") && password.equals("password")) {
-            int numTasks = Integer.parseInt(JOptionPane.showInputDialog("Enter number of tasks"));
+        // Register User
+        firstname = JOptionPane.showInputDialog("Enter first name:");
+        lastname = JOptionPane.showInputDialog("Enter last name:");
 
-            Task[] tasks = new Task[numTasks];
-            double totalHours = 0;
+        // Username validation
+        do {
+            username = JOptionPane.showInputDialog("Enter username (must contain '_' and be 5 characters or less):");
+        } while (!log.CheckUsername(username));
+
+        // Password validation
+        password = JOptionPane.showInputDialog("Enter password (must include uppercase, number, and special character):");
+        while (!log.checkPassword(password)) {
+            password = JOptionPane.showInputDialog("Enter password:");
+        }
+
+        // Register the user
+        log.registerUser(username, password, firstname, lastname);
+        isRegistered = true;
+
+        // Login User
+        if (isRegistered) {
+            String loginUsername = JOptionPane.showInputDialog("Log in with your username:");
+            String loginPassword = JOptionPane.showInputDialog("Enter your password:");
+
+            String loginResult = log.loginUser(loginUsername, loginPassword);
+            JOptionPane.showMessageDialog(null, loginResult);
+
+            if (loginResult.contains("Welcome")) {
+                isLoggedIn = true;
+            } else {
+                JOptionPane.showMessageDialog(null, "Login failed. Exiting.");
+                return;
+            }
+        }
+
+        // Allow task creation only if user is logged in
+        if (isLoggedIn) {
+            String numTasksStr = JOptionPane.showInputDialog("How many tasks do you wish to enter?");
+            int numTasks = Integer.parseInt(numTasksStr);
 
             for (int i = 0; i < numTasks; i++) {
-                String taskName = JOptionPane.showInputDialog("Enter task name");
-                String taskDescription = 
-           JOptionPane.showInputDialog("Enter task description");
-                while (taskDescription.length() > 50) {
-                    JOptionPane.showMessageDialog(null, "Please enter a task description of less than 50 characters");
-                    taskDescription = JOptionPane.showInputDialog("Enter task description");
-                }
-                String developerDetails = JOptionPane.showInputDialog("Enter developer details");
-                double taskDuration = Double.parseDouble(JOptionPane.showInputDialog("Enter task duration (hours)"));
+                String taskName = JOptionPane.showInputDialog("Enter task name:");
 
-                String[] taskStatusOptions = {"To Do", "Done", "Doing"};
-                String taskStatus = (String) JOptionPane.showInputDialog(null, "Select task status", "Task Status", JOptionPane.QUESTION_MESSAGE, null, taskStatusOptions, taskStatusOptions[0]);
-             Task task = new Task(taskName, i, taskDescription, developerDetails, taskDuration, taskStatus);
-                tasks[i] = task;
-                totalHours += task.returnTotalHours();
+                String taskDescription;
+                do {
+                    taskDescription = JOptionPane.showInputDialog("Enter task description (up to 50 characters):");
+                } while (taskDescription.length() > 50);
 
-                JOptionPane.showMessageDialog(null, task.printTaskDetails());
+                String developerDetails = JOptionPane.showInputDialog("Enter developer details:");
+                String taskDurationStr = JOptionPane.showInputDialog("Enter task duration in hours:");
+                double taskDuration = Double.parseDouble(taskDurationStr);
+                String taskStatus = JOptionPane.showInputDialog("Enter task status:");
+
+                // Create a task instance
+                Task task = new Task(taskName, i + 1, taskDescription, developerDetails, taskDuration, taskStatus);
+                JOptionPane.showMessageDialog(null, "Task added successfully!\n" + task.printTaskDetails());
             }
-
-            JOptionPane.showMessageDialog(null, "Total hours across all tasks: " + totalHours);
-
-            while (true) {
-                String[] menuOptions = {"1. Add tasks", "2. Show report", "3. Quit"};
-                String menuSelection = (String) JOptionPane.showInputDialog(null, "Select an option", "Menu", JOptionPane.QUESTION_MESSAGE, null, menuOptions, menuOptions[0]);
-                switch (menuSelection) {
-                    case "1. Add tasks":
-                        // Add task logic
-                        break;
-                    case "2. Show report":
-JOptionPane.showMessageDialog(null, "Coming soon...");
-                        break;
-                    case "3. Quit":
-                        System.exit(0);
-                        break;
-                }
-            }
-        } else {
-            JOptionPane.showMessageDialog(null, "Invalid username or password");
         }
     }
-
-    }
-
+}
